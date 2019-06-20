@@ -1,0 +1,28 @@
+version: '3.4'
+
+services:
+  rest-api:
+    build: .
+    volumes:
+      - .:/usr/src/app
+    ports:
+      - 5000:80
+    environment:
+      DYNAMODB_TABLE: 'items'
+      # Local only
+      AWS_ENDPOINT_DYNAMODB: http://localstack:4569
+      AWS_REGION: 'eu-west-1'
+      AWS_ACCESS_KEY_ID: '-'
+      AWS_SECRET_ACCESS_KEY: '-'      
+      DYNAMO_ENABLE_LOCAL: 'True'
+      DYNAMO_LOCAL_HOST: localstack
+      DYNAMO_LOCAL_PORT: 4569
+
+  localstack:
+    image: localstack/localstack
+    ports:
+      - 4569:4569
+    environment:
+      - SERVICES=dynamodb:4569
+      - DEFAULT_REGION=eu-west-1
+      - HOSTNAME=localstack
