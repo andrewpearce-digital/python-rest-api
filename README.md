@@ -41,7 +41,7 @@ Subsequent response definitions will only detail the expected value of the `data
 ]
 ```
 
-### Registering a new device
+### Adding a new item
 
 **Definition**
 
@@ -66,7 +66,7 @@ If an item with the given identifier already exists, the existing device will be
 }
 ```
 
-## Lookup device details
+## Lookup item details
 
 `GET /item/<identifier>`
 
@@ -82,7 +82,7 @@ If an item with the given identifier already exists, the existing device will be
 }
 ```
 
-## Delete a device
+## Delete an item
 
 **Definition**
 
@@ -99,4 +99,4 @@ docker-compose build
 docker-compose up
 ```
 
-The project wil run on localhost:5000
+The project will be running on localhost:5000
