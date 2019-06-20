@@ -1,9 +1,7 @@
-from boto3.session import Session
-from boto3.dynamodb.conditions import Key
+from boto3.dynamodb.conditions import Key, Attr
 import boto3
 from flask import Flask
 from flask_restful import Resource,  Api, reqparse
-from flask_dynamo import Dynamo
 import markdown
 import os
 
@@ -13,31 +11,45 @@ app = Flask(__name__)
 # Create the API
 api = Api(app)
 
-# define boto session for dynamo
-boto_session = Session(
+dynamodb = boto3.resource(
+    'dynamodb',
     region_name=os.environ['AWS_REGION'],
     aws_access_key_id=os.environ['AWS_ACCESS_KEY_ID'],
-    aws_secret_access_key=os.environ['AWS_SECRET_ACCESS_KEY']
-)
-app.config['DYNAMO_SESSION'] = boto_session
+    aws_secret_access_key=os.environ['AWS_SECRET_ACCESS_KEY'],
+    endpoint_url=os.environ['AWS_ENDPOINT_DYNAMODB'])
 
-# define db
-dynamodb_table = os.environ['DYNAMODB_TABLE']
-app.config['DYNAMO_TABLES'] = [
-    dict(
-        TableName=dynamodb_table,
-        KeySchema=[dict(AttributeName='identifier', KeyType='HASH')],
-        AttributeDefinitions=[
-            dict(AttributeName='identifier', AttributeType='S')],
-        ProvisionedThroughput=dict(ReadCapacityUnits=5, WriteCapacityUnits=5)
-    ),
-]
-dynamo = Dynamo(app)
-with app.app_context():
-    dynamo.create_all()
 
-for table_name, table in dynamo.tables.items():
-    print(table_name, table)
+def create_table():
+    try:
+        response = dynamodb.create_table(
+            AttributeDefinitions=[
+                {
+                    'AttributeName': 'identifier',
+                    'AttributeType': 'S'
+                },
+            ],
+            TableName=os.environ['DYNAMODB_TABLE'],
+            KeySchema=[
+                {
+                    'AttributeName': 'identifier',
+                    'KeyType': 'HASH'
+                },
+            ],
+            ProvisionedThroughput={
+                'ReadCapacityUnits': 5,
+                'WriteCapacityUnits': 5
+            },
+        )
+        print(response)
+        return response
+    except:
+        response = dynamodb.tables.all()
+        print(response)
+        pass
+
+
+create_table()
+dynamodb_table = dynamodb.Table(os.environ['DYNAMODB_TABLE'])
 
 # put documentation on service root
 @app.route("/")
@@ -49,7 +61,7 @@ def hello():
 
 class ItemsList(Resource):
     def get(self):
-        response = dynamo.tables[dynamodb_table].scan()
+        response = dynamodb_table.scan()
         return {'message': 'success', 'data': response['Items']}, 200
 
     def post(self):
@@ -60,7 +72,8 @@ class ItemsList(Resource):
 
         args = parser.parse_args()
 
-        dynamo.tables[dynamodb_table].put_item(Item=args)
+        dynamodb_table.put_item(
+            Item=args)
 
         return {'message': 'Item recorded', 'data': args}, 201
 
@@ -68,15 +81,16 @@ class ItemsList(Resource):
 class Items(Resource):
     def get(self, identifier):
         try:
-            query = dynamo.tables[dynamodb_table].query(
+            query = dynamodb_table.query(
                 KeyConditionExpression=Key('identifier').eq(identifier)
-            )['Items'][0]['identifier']
+            )['Items'][0]
+            print(query)
             return {'message': 'Item found', 'data': query}, 200
         except:
             return {'message': 'Item not found', 'data': {}}, 404
 
     def delete(self, identifier):
-        delete = dynamo.tables[dynamodb_table].delete_item(
+        delete = dynamodb_table.delete_item(
             Key={'identifier': identifier}
         )
         return {'message': 'Item deleted', 'data': {}}, 204
