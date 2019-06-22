@@ -100,3 +100,8 @@ docker-compose up
 ```
 
 The project will be running on localhost:5000
+
+Run integration tests with 
+```
+python -m pytest -v
+```
