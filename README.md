@@ -6,6 +6,21 @@ Based on Jake Wright's excellent video and home automation project
 https://youtu.be/4T5Gnrmzjak
 
 
+## Starting the ReST API service
+
+Start the service using docker-compose
+```
+docker-compose build
+docker-compose up
+```
+
+The project will be running on localhost:5000
+
+Run integration tests with 
+```
+python -m pytest -v
+```
+
 ## Usage
 All responses will have the form
 
@@ -93,15 +108,3 @@ If an item with the given identifier already exists, the existing device will be
 - `204 No Content`
 
 
-## Docker-Compose
-```
-docker-compose build
-docker-compose up
-```
-
-The project will be running on localhost:5000
-
-Run integration tests with 
-```
-python -m pytest -v
-```
