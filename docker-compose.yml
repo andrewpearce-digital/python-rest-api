@@ -13,7 +13,9 @@ services:
       AWS_ENDPOINT_DYNAMODB: http://localstack:4569
       AWS_REGION: 'eu-west-1'
       AWS_ACCESS_KEY_ID: '-'
-      AWS_SECRET_ACCESS_KEY: '-'      
+      AWS_SECRET_ACCESS_KEY: '-'
+    depends_on:
+      - localstack
 
   localstack:
     image: localstack/localstack
@@ -23,3 +25,11 @@ services:
       - SERVICES=dynamodb:4569
       - DEFAULT_REGION=eu-west-1
       - HOSTNAME=localstack
+      - HOSTNAME_EXTERNAL=localstack
+
+  # integration-tests:
+  #   build: ./tests/
+  #   environment:
+  #     - SERVICE_URL=http://rest-api:5000
+  #   depends_on:
+  #     - rest-api
