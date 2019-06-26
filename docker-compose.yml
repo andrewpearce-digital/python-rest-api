@@ -27,9 +27,10 @@ services:
       - HOSTNAME=localstack
       - HOSTNAME_EXTERNAL=localstack
 
-  # integration-tests:
-  #   build: ./tests/
-  #   environment:
-  #     - SERVICE_URL=http://rest-api:5000
-  #   depends_on:
-  #     - rest-api
+  integration-tests:
+    build: ./tests/
+    environment:
+      - SERVICE_URL=http://rest-api
+    depends_on:
+      - rest-api
+      - localstack
